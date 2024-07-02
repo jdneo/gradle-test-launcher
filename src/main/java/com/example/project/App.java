@@ -1,21 +1,26 @@
 package com.example.project;
 
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.gradle.tooling.GradleConnector;
-import org.gradle.tooling.events.ProgressListener;
+import org.gradle.tooling.ProjectConnection;
 import org.gradle.tooling.events.OperationType;
 import org.gradle.tooling.events.ProgressEvent;
-import org.junit.jupiter.api.Test;
+import org.gradle.tooling.events.ProgressListener;
 
-class GradleTapiTests {
+public class App {
 
-    @Test
-    void test() {
+    public static void main(String[] args) {
         File project = new File(System.getProperty("user.dir"));
         GradleConnector connector = GradleConnector.newConnector()
             .forProjectDirectory(project);
-        connector.connect()
+        Map<String, String> env = new HashMap<>();
+        env.put("key", "value");
+
+        try (ProjectConnection connection = connector.connect()) {
+            connection
             .newTestLauncher()
             .addProgressListener(new ProgressListener() {
 
@@ -25,8 +30,9 @@ class GradleTapiTests {
                 }
 
             }, OperationType.TEST)
-            .withJvmTestClasses("com.example.project.NestedTests")
+            .withJvmTestClasses("com.example.project.EnvTests*")
+        //    .setEnvironmentVariables(env)
             .run();
+        }
     }
-
 }
